@@ -2,7 +2,10 @@
 
 > 版本: 1.0 | 最后更新: 2026-07-11
 > 仓库: [github.com/shuishouac/utm-link-generator](https://github.com/shuishouac/utm-link-generator)
-> 参考模板: [飞书多维表格](https://vz1ttoudep.feishu.cn/base/OQVablOecazotDsZGp6cZwcDnog?from=from_copylink)
+>
+> 📎 **飞书参考模板**: [水手阿C UTM链接生成器](https://vz1ttoudep.feishu.cn/base/OQVablOecazotDsZGp6cZwcDnog?from=from_copylink)
+>
+> 本工具的 UTM 参数规范全部基于此飞书多维表格。参数顺序、source/medium 下拉选项、campaign 分类、term 格式等均以表格为准。
 
 ---
 
