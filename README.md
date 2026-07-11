@@ -18,9 +18,9 @@
 ## 安装
 
 ```bash
-git clone https://github.com/shuishouac/utm-link-generator.git
-cd utm-link-generator
-pip install -r requirements.txt
+git clone <你的仓库地址>
+cd <仓库目录>
+bash skills/utm-link-generator/install.sh
 ```
 
 ## 使用方式

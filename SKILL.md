@@ -3,7 +3,8 @@
 标准化 UTM 链接生成工具。根据上下文信息自动生成符合团队规范的 UTM 跟踪链接。
 
 - **参考模板**: [飞书多维表格 - 水手阿C UTM链接生成器模板](https://vz1ttoudep.feishu.cn/base/OQVablOecazotDsZGp6cZwcDnog?from=from_copylink)
-- **触发关键词**: `生成utm链接` / `utm` / `生成链接` / `帮我生成UTM`
+- **触发关键词**: `生成utm链接` / `utm` / `生成链接` / `帮我生成UTM` / `帮我生成链接` / `出个链接`
+- **Campaign 一致性**: 每个活动使用固定统一的 campaign 名称，生成时会向您确认
 
 ---
 
@@ -236,31 +237,130 @@ https://example.com/?&utm_campaign={campaign}&utm_medium={medium}&utm_source={so
 
 ---
 
+## 触发方式
+
+通过以下任一方式即可触发 UTM 链接生成：
+
+### 方式一：一句话包含所有信息（推荐）
+
+在当前对话中一次性提供所有参数，Agent 自动提取生成，无需反问。
+
+> "生成utm链接，我们在黑色星期五和一个叫 Jessica 的 Instagram 达人合作推广新品包包，目标链接 https://myshop.com/products/bag，7月11日发布"
+
+### 方式二：对话中分段提供信息
+
+先聊活动方案，然后发送触发词，Agent 从上文提取参数。
+
+> **你**：下周黑色星期五我们和 Jessica 合作推新品包包，在 Instagram 上发帖，链接到 https://myshop.com/products/bag，7月11号上线
+> **Agent**：收到，记下了
+> **你**：生成utm链接
+> **Agent**：（从上文提取全部参数直接生成，无需再问）
+
+### 方式三：只说触发词 + 逐步补充
+
+> **你**：生成utm链接
+> **Agent**：好的，请告诉我：
+> 1️⃣ 目标链接是什么？
+> 2️⃣ 这是什么活动？
+> 3️⃣ 通过什么方式触达？...
+>
+> **你**：https://myshop.com/sale，黑色星期五，Jessica 在 Instagram 发帖
+> **Agent**：（生成完整链接）
+
+### 方式四：批量生成多个链接
+
+> "帮我生成这周的 UTM 链接，周三发春季大促的邮件推 https://myshop.com/sale，周五发 Instagram 达人合作推 https://myshop.com/new"
+
+### 方式五：修改已有链接 / 基于上次生成
+
+> "刚才那个链接换一下目标 URL，改成 https://myshop.com/spring，其他不变"
+
+或：
+> "再帮我生成一个，还是春季大促，这次是在 Facebook 投广告"
+
+---
+
 ## 推断流程
 
-当用户说"生成utm链接"并提供上下文时，按以下顺序推断：
+### 核心原则：从上下文提取，不问多余问题
 
-1. **确认目标 URL** → 如果用户未提供，要求用户提供
-2. **识别活动类型** → 匹配 campaign 分类中最近似的标准化名称
-3. **识别营销媒介** → 从触达方式匹配 utm_medium
-4. **识别流量来源** → 从上下文提到的渠道匹配 utm_source
-5. **识别内容标识** → 达人名字、素材描述等填入 utm_content
-6. **确认日期** → 填入 utm_term（默认当天），固定后缀 `launch`
+当用户触发 UTM 生成时，按以下优先级处理：
 
-### 交互流程
+**第一步：扫描当前会话上下文**
+
+如果当前对话中已经包含了必要的信息（URL、活动类型、渠道、日期等），直接提取，**不需要重新向用户确认**。
+
+**第二步：参数提取**
+
+对每一项参数，按优先级从以下来源提取：
+
+| 参数 | 提取优先级 |
+|------|-----------|
+| `url` | ①用户显式提供 ②上文中用户提到的链接 |
+| `campaign` | ①用户自定义名称 ②上下文推断活动类型 ③反问用户 |
+| `medium` | ①上下文触达方式 ②反问用户 |
+| `source` | ①上下文平台/渠道 ②反问用户 |
+| `content` | ①上下文达人/素材名 ②视情况留空 |
+| `term` | ①用户指定日期 ②默认当天 |
+
+**第三步：仅信息缺失时反问**
+
+如果扫描上下文后发现某参数缺失，**只针对缺失项提问**，不重复问已有信息。
+
+> ✅ 正确做法：
+> 用户: 帮我生成黑色星期五的utm链接 https://myshop.com/sale
+> Agent: 收到！黑五活动。是通过什么方式触达？哪个平台？
+
+> ❌ 错误做法：
+> 用户: 帮我生成黑色星期五的utm链接 https://myshop.com/sale
+> Agent: 目标链接是什么？什么活动？什么方式？...
+> （用户刚说过，不应重复问）
+
+**第四步：生成后确认 campaign 名称一致性**
+
+每次生成后，主动确认 campaign 名称：
+
+> "这次使用的 campaign 名称是 `black-friday`，后续为同一活动生成链接时请保持统一，方便数据汇总。"
+
+如果 campaign 是用户自定义的，确认格式：
+
+> "活动名称我理解为 `2026-summer-promo`，这个名称后续这个活动都会统一使用，可以吗？"
+
+### 交互流程完整示例
 
 ```
+场景 A：上下文已包含全部信息
+
+用户: 下周黑色星期五和 Jessica 合作推包包 → 链接 https://shuishouac.com/bag，7月11号在 Ins 发
+
+Agent: 记下了，黑五 + Instagram + Jessica。
+
 用户: 生成utm链接
 
-Agent 反问（如缺少信息）：
-1. 目标链接是什么？
-2. 这是什么活动？（节日/促销/新品/会员/清仓/品牌/老客/拉新）
-3. 通过什么方式触达？（广告/社媒/邮件/达人/联盟/二维码等）
-4. 流量从哪个平台/渠道来？
-5. 具体素材或达人名字是什么？
-6. 发布日期是什么时候？
+Agent:
+🔗 UTM 链接
 
-Agent 生成后展示完整 UTM 链接并逐项确认。
+https://shuishouac.com/bag?&utm_campaign=black-friday&utm_medium=influencer&utm_source=instagram&utm_content=creator-jessica&utm_term=20260711launch
+
+📋 参数解析
+| 参数 | 值 | 说明 |
+|------|-----|------|
+| utm_campaign | black-friday | ⚠️ 后续同一活动请保持此名称 |
+| ... | ... | ... |
+
+---
+
+场景 B：信息不足，只问缺失项
+
+用户: 帮我生成utm链接，黑色星期五活动，目标链接 https://shuishouac.com/sale
+
+Agent: 收到！已知道：
+✅ 目标链接: https://shuishouac.com/sale
+✅ 活动: black-friday
+
+还有两个信息需要补充：
+1️⃣ 通过什么方式触达？（邮件/达人/广告/社媒...）
+2️⃣ 在哪个平台？（Instagram/TikTok/Google/邮件...）
 ```
 
 ---
@@ -280,28 +380,43 @@ Agent 生成后展示完整 UTM 链接并逐项确认。
 
 | 参数 | 值 | 说明 |
 |------|-----|------|
-| utm_campaign | {campaign} | 活动名称 |
+| utm_campaign | {campaign} | 活动名称 — ⚠️ 后续同一活动请保持统一 |
 | utm_medium | {medium} | 营销媒介 |
 | utm_source | {source} | 流量来源 |
 | utm_content | {content} | 内容标识 |
 | utm_term | {term} | 时间标识 |
 ```
 
+> 每次生成后附带 campaign 名称一致性提醒，确保用户知道后续同活动要用同一个名称。
+
 ---
 
 ## 使用示例
 
-### 示例 1：达人合作
+### 示例 1：达人合作（全信息单句触发）
 
 **用户输入**：
 > 生成utm链接，我们在黑色星期五和一个叫 Jessica 的 Instagram 达人合作推广新品包包，目标链接 https://myshop.com/products/bag，7月11日发布
 
 **生成结果**：
 ```
+🔗 UTM 链接
+
 https://myshop.com/products/bag?&utm_campaign=black-friday&utm_medium=influencer&utm_source=instagram&utm_content=creator-jessica&utm_term=20260711launch
+
+---
+
+📋 参数解析
+| 参数 | 值 | 说明 |
+|------|-----|------|
+| utm_campaign | black-friday | ⚠️ 后续同一活动请保持统一 |
+| utm_medium | influencer | 达人营销 |
+| utm_source | instagram | Instagram 平台 |
+| utm_content | creator-jessica | 达人 Jessica |
+| utm_term | 20260711launch | 7月11日发布 |
 ```
 
-### 示例 2：邮件营销
+### 示例 2：邮件营销（全信息单句触发）
 
 **用户输入**：
 > 生成utm链接，给会员发一封双倍积分的邮件，链接到 https://myshop.com/member，7月9日发布
@@ -311,7 +426,7 @@ https://myshop.com/products/bag?&utm_campaign=black-friday&utm_medium=influencer
 https://myshop.com/member?&utm_campaign=double-points&utm_medium=email&utm_source=email&utm_content=email-double-points&utm_term=20260709launch
 ```
 
-### 示例 3：社媒广告
+### 示例 3：社媒广告（全信息单句触发）
 
 **用户输入**：
 > 生成utm链接，TikTok 上投春季大促广告，主打新款连衣裙 https://myshop.com/collections/dresses，今天发
@@ -321,14 +436,92 @@ https://myshop.com/member?&utm_campaign=double-points&utm_medium=email&utm_sourc
 https://myshop.com/collections/dresses?&utm_campaign=spring-sale&utm_medium=paid-social&utm_source=tiktok&utm_content=ad-spring-dresses&utm_term=20260711launch
 ```
 
-### 示例 4：返校季达人
+### 示例 4：分段对话触发（从上下文提取）
+
+**对话**：
+```
+你: 下周返校季和 Carry 合作，他在 Instagram 发帖推广 https://shuishouac.com/，7月9号发
+Agent: 好的，返校季活动 + Instagram + Carry。
+
+你: 生成utm链接
+Agent:
+🔗 UTM 链接
+
+https://shuishouac.com/?&utm_campaign=backtoschool&utm_medium=influencer&utm_source=instagram&utm_content=creator-carry&utm_term=20260709launch
+
+📋 参数解析
+| utm_campaign | backtoschool | ⚠️ 后续同一活动请保持统一 |
+| utm_medium | influencer | 达人营销 |
+| utm_source | instagram | Instagram |
+| utm_content | creator-carry | 达人 Carry |
+| utm_term | 20260709launch | 7月9日发布 |
+```
+
+### 示例 5：用户自定义 campaign 名称 + 空格转连字符
 
 **用户输入**：
-> 生成utm链接，和 Carry 合作返校季活动，他在 Instagram 发帖推广 https://shuishouac.com/，7月9日
+> 生成utm链接，我们的 Summer Sale 2026 活动，在 Facebook 投广告推 https://shuishouac.com/summer，明天发
+
+**处理过程**：
+- `Summer Sale 2026` → `summer-sale-2026`（空格转连字符，大写转小写）
+- 生成后确认：**"campaign 名称使用 `summer-sale-2026`，后续同活动请保持统一，可以吗？"**
 
 **生成结果**：
 ```
-https://shuishouac.com/?&utm_campaign=backtoschool&utm_medium=influencer&utm_source=instagram&utm_content=creator-carry&utm_term=20260709launch
+https://shuishouac.com/summer?&utm_campaign=summer-sale-2026&utm_medium=paid-social&utm_source=facebook&utm_content=ad-summer-sale&utm_term=20260712launch
+```
+
+### 示例 6：信息不完整（仅反问缺失项）
+
+**用户输入**：
+> 帮我生成utm链接，黑色星期五活动，目标链接 https://shuishouac.com/sale
+
+**Agent 回复**：
+> 已记录：
+> ✅ 目标链接: https://shuishouac.com/sale
+> ✅ 活动: black-friday
+>
+> 还需要补充 2 项：
+> 1️⃣ 通过什么方式触达？（广告/邮件/达人/社媒...）
+> 2️⃣ 在哪个平台/渠道？（Instagram/TikTok/Google/邮件...）
+
+**用户补充**：
+> Instagram 达人
+
+**Agent 生成**：
+```
+🔗 UTM 链接
+
+https://shuishouac.com/sale?&utm_campaign=black-friday&utm_medium=influencer&utm_source=instagram&utm_content=20260711launch
+```
+
+### 示例 7：批量生成多个链接
+
+**用户输入**：
+> 帮我生成这周两个UTM链接：
+> 1. 周三发春季大促邮件 → https://shuishouac.com/sale
+> 2. 周五发 Instagram 达人合作推新品 → https://shuishouac.com/new
+> 这两个都是7月这周，今天7月11号
+
+**生成结果**：
+```
+1️⃣ 邮件（7月11日）
+https://shuishouac.com/sale?&utm_campaign=spring-sale&utm_medium=email&utm_source=email&utm_content=email-spring-sale&utm_term=20260711launch
+
+2️⃣ 达人合作（7月11日）
+https://shuishouac.com/new?&utm_campaign=spring-sale&utm_medium=influencer&utm_source=instagram&utm_content=creator-&utm_term=20260711launch
+
+⚠️ 两个链接都使用 campaign 名称 spring-sale，方便统一分析。
+```
+
+### 示例 8：基于上次生成修改
+
+**用户输入**：
+> 刚才那个链接，目标链接改成 https://shuishouac.com/spring2026，其他的不变
+
+**生成结果**（复用上次参数，只变 URL）：
+```
+https://shuishouac.com/spring2026?&utm_campaign=spring-sale&utm_medium=email&utm_source=email&utm_content=email-spring-sale&utm_term=20260711launch
 ```
 
 ---

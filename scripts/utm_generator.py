@@ -141,6 +141,11 @@ def interactive_mode():
     campaign = input("   输入: ").strip().lower().replace(" ", "-")
     if campaign not in VALID_CAMPAIGNS:
         print(f"💡 '{campaign}' 不在参考列表中，将直接使用（记得保持一致性）")
+    # 确认 campaign 名称
+    confirm = input(f"✅ campaign 名称确认使用「{campaign}」？(Y/n): ").strip().lower()
+    if confirm == "n" or confirm == "no":
+        print("  已取消，请重新输入")
+        campaign = input("   重新输入: ").strip().lower().replace(" ", "-")
 
     print("\n3️⃣  营销媒介 (utm_medium)")
     print(f"   可选: {', '.join(VALID_MEDIUMS)}")
