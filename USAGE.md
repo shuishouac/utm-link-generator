@@ -310,12 +310,11 @@ A: **不可以。** 全部参数必须用英文小写。中文活动名称 Agent
 
 ---
 
-## 附录：文件和仓库
+## 附录：文件
 
 | 资源 | 链接 |
 |------|------|
-| 独立仓库（推荐） | [github.com/shuishouac/utm-link-generator](https://github.com/shuishouac/utm-link-generator) |
-| 主仓库（Skill 文件） | [github.com/Luoye-W/ac → skills/utm-link-generator/](https://github.com/Luoye-W/ac/tree/main/skills/utm-link-generator) |
+| 主仓库 | [github.com/shuishouac/utm-link-generator](https://github.com/shuishouac/utm-link-generator) |
 | 飞书模板 | [水手阿C UTM链接生成器](https://vz1ttoudep.feishu.cn/base/OQVablOecazotDsZGp6cZwcDnog?from=from_copylink) |
 | CLI 工具 | `scripts/utm_generator.py`（需 Python 环境） |
 | 配置文件 | `scripts/utm_config.json`（自定义 source/medium/campaign 列表） |
