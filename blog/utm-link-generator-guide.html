@@ -1,0 +1,727 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UTM 链接生成完全指南 · 水手阿C</title>
+  <meta name="description" content="UTM 五参数详解 + 飞书模板 + 开源 AI 工具，帮你建立一套标准化、可自动化的 UTM 管理体系。" />
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #657084;
+      --line: #dfe6ee;
+      --paper: #f7f3eb;
+      --panel: #ffffff;
+      --sea: #0b5e73;
+      --blue: #1769ff;
+      --orange: #ff8a2a;
+      --green: #1f9a7a;
+      --night: #10212c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Inter, "Microsoft YaHei", "PingFang SC", "Noto Sans SC", Arial, sans-serif;
+      line-height: 1.7;
+    }
+    .page {
+      min-height: 100vh;
+      background: radial-gradient(circle at 76% 12%, rgba(255,138,42,0.12), transparent 28%),
+                  linear-gradient(135deg, #f8f4eb 0%, #eef5f7 48%, #f7f3eb 100%);
+    }
+    .shell { width: min(880px, calc(100vw - 72px)); margin: 0 auto; }
+
+    /* Header */
+    header {
+      height: 84px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-weight: 800;
+      letter-spacing: 0;
+      text-decoration: none;
+      color: var(--ink);
+    }
+    .mark {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: var(--night);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      box-shadow: 0 10px 24px rgba(16,33,44,0.18);
+    }
+    nav { display: flex; gap: 30px; color: #516073; font-size: 15px; }
+    nav a { color: inherit; text-decoration: none; transition: color .2s; cursor: pointer; }
+    nav a:hover { color: var(--sea); }
+    .nav-cta { color: var(--sea); font-weight: 700; }
+    .back-link { color: var(--sea); font-weight: 700; text-decoration: none; }
+
+    /* Article */
+    article { padding: 40px 0 72px; }
+    .meta {
+      display: flex; gap: 16px; align-items: center;
+      color: var(--muted); font-size: 14px;
+      margin: 0 0 28px;
+    }
+    .tag {
+      display: inline-block;
+      padding: 4px 10px;
+      background: rgba(11,94,115,0.1);
+      color: var(--sea);
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 4px;
+    }
+    h1 {
+      font-size: 48px;
+      line-height: 1.15;
+      margin: 0 0 16px;
+      letter-spacing: 0;
+    }
+    h2 {
+      font-size: 30px;
+      margin: 48px 0 16px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--line);
+    }
+    h3 { font-size: 22px; margin: 32px 0 12px; }
+    h4 { font-size: 18px; margin: 24px 0 8px; }
+    p, li { color: #2c3a4f; }
+    p { margin: 0 0 16px; }
+    a { color: var(--sea); }
+    ul, ol { padding-left: 24px; margin: 0 0 16px; }
+    li { margin-bottom: 6px; }
+
+    /* Code */
+    code, pre {
+      font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+      background: rgba(16,33,44,0.06);
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    code { padding: 2px 6px; }
+    pre {
+      padding: 16px 20px;
+      overflow-x: auto;
+      line-height: 1.55;
+      border: 1px solid var(--line);
+      margin: 0 0 20px;
+    }
+    pre code { background: none; padding: 0; }
+
+    /* Callout */
+    .callout {
+      padding: 16px 20px;
+      border-left: 4px solid var(--sea);
+      background: rgba(11,94,115,0.06);
+      margin: 0 0 20px;
+      border-radius: 0 6px 6px 0;
+    }
+    .callout.warn { border-left-color: var(--orange); background: rgba(255,138,42,0.08); }
+    .callout.danger { border-left-color: #d43; background: rgba(212,68,51,0.06); }
+    .callout p { margin: 0; }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0 0 20px;
+      font-size: 14px;
+    }
+    th, td {
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: rgba(16,33,44,0.04); font-weight: 700; }
+    tr:nth-child(even) td { background: rgba(255,255,255,0.5); }
+
+    /* --- Interactive Tool --- */
+    .tool-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 32px;
+      margin: 40px 0;
+      box-shadow: 0 4px 20px rgba(16,33,44,0.08);
+    }
+    .tool-card h2 { border: none; margin-top: 0; }
+    .tool-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .tool-field { margin-bottom: 14px; }
+    .tool-field.full { grid-column: 1 / -1; }
+    .tool-field label {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--ink);
+    }
+    .tool-field label small { font-weight: 400; color: var(--muted); }
+    .tool-field input, .tool-field select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      font-size: 15px;
+      font-family: inherit;
+      background: #fff;
+      color: var(--ink);
+      transition: border-color .2s;
+    }
+    .tool-field input:focus, .tool-field select:focus {
+      outline: none;
+      border-color: var(--sea);
+      box-shadow: 0 0 0 3px rgba(11,94,115,0.12);
+    }
+    .tool-btn {
+      height: 48px;
+      padding: 0 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--night);
+      background: var(--night);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 800;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background .2s;
+      margin-top: 8px;
+    }
+    .tool-btn:hover { background: #1f3a4a; }
+    .tool-output {
+      margin-top: 20px;
+      padding: 20px;
+      background: var(--night);
+      color: #fff;
+      border-radius: 6px;
+      display: none;
+      word-break: break-all;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .tool-output.show { display: block; }
+    .tool-output .url { font-size: 15px; margin-bottom: 12px; }
+    .tool-output .url a { color: #7fc1e6; }
+    .tool-params {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 6px 16px;
+      font-size: 13px;
+      border-top: 1px solid rgba(255,255,255,0.15);
+      padding-top: 12px;
+      margin-top: 12px;
+    }
+    .tool-params .key { color: #b7c3cf; }
+    .tool-params .val { color: #fff; font-weight: 700; }
+    .tool-params .hint { color: var(--orange); font-size: 12px; }
+    .tool-copy {
+      margin-top: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      font-family: inherit;
+      transition: background .2s;
+    }
+    .tool-copy:hover { background: rgba(255,255,255,0.2); }
+    .tool-copy.copied { background: var(--green); }
+    .campaign-note {
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: rgba(255,138,42,0.1);
+      border-left: 3px solid var(--orange);
+      border-radius: 0 4px 4px 0;
+      font-size: 13px;
+      color: #5a3a00;
+      display: none;
+    }
+    .campaign-note.show { display: block; }
+
+    /* Bottom nav */
+    .bottom-nav {
+      margin-top: 48px;
+      padding: 24px 0;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+    }
+    .bottom-nav a { color: var(--sea); font-weight: 700; text-decoration: none; }
+
+    @media (max-width: 700px) {
+      .shell { width: min(100vw - 32px, 720px); }
+      h1 { font-size: 32px; }
+      h2 { font-size: 24px; }
+      .tool-grid { grid-template-columns: 1fr; }
+      nav { gap: 16px; font-size: 13px; }
+      nav span:nth-child(2), nav span:nth-child(3) { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <header class="shell">
+    <a class="brand" href="/">
+      <div class="mark">C</div>
+      <div>水手阿C</div>
+    </a>
+    <nav aria-label="主导航">
+      <a href="/">首页</a>
+      <span>跨境观察</span>
+      <span>增长实操</span>
+      <span>AI 提效</span>
+      <a class="nav-cta" href="/blog/utm-link-generator-guide.html">UTM 工具</a>
+    </nav>
+  </header>
+
+  <article class="shell">
+    <a class="back-link" href="/">← 返回首页</a>
+
+    <div class="meta">
+      <span class="tag">增长实操</span>
+      <span>2026-07-12</span>
+      <span>· 水手阿C</span>
+    </div>
+
+    <h1>UTM 链接生成完全指南</h1>
+    <p style="font-size:18px;color:var(--muted);margin-bottom:32px;">
+      从飞书模板到 AI 自动生成，建立你的标准化 UTM 管理体系
+    </p>
+
+    <!-- ============================================================ -->
+    <!-- 文章正文 -->
+    <!-- ============================================================ -->
+
+    <h2>一、为什么你需要一套 UTM 标准？</h2>
+    <p>如果你是独立站卖家或电商运营，大概率遇到过这些场景：</p>
+    <ul>
+      <li>投了 5 个渠道的广告，<strong>后台分不清</strong>哪个渠道带来了转化</li>
+      <li>同一个活动，同事写 <code>black-friday</code>，你写 <code>bf-2026</code>，<strong>数据统计不到一起</strong></li>
+      <li>复盘时想按活动维度看 ROI，却发现 <strong>campaign 名称五花八门</strong>，根本无法聚合</li>
+      <li>每次手动拼接 <code>?utm_campaign=...&amp;utm_medium=...</code>，<strong>容易拼错或漏参数</strong></li>
+    </ul>
+    <p>这些问题归根结底一个原因：<strong>没有标准化的 UTM 管理规范。</strong></p>
+    <p>本指南做三件事：</p>
+    <ol>
+      <li><strong>讲清楚 UTM 五个参数的定义和规范</strong></li>
+      <li><strong>给出一套可直接复制使用的飞书模板</strong></li>
+      <li><strong>教会你如何用 AI 和开源工具自动生成标准 UTM 链接</strong></li>
+    </ol>
+
+    <h2>二、UTM 五参数详解</h2>
+    <p>一个标准的 UTM 链接长这样：</p>
+    <pre><code>https://shuishouac.com/products/bag?&amp;utm_campaign=black-friday&amp;utm_medium=influencer&amp;utm_source=instagram&amp;utm_content=creator-jessica&amp;utm_term=20260711launch</code></pre>
+    <p>参数顺序固定：<strong>campaign → medium → source → content → term</strong></p>
+
+    <h3>1. utm_campaign（营销活动名称）⭐ 最重要</h3>
+    <p><strong>定义</strong>：标识一次具体的营销活动。这是数据分析中最重要的分组维度。</p>
+    <div class="callout warn">
+      <p><strong>核心原则</strong>：一个活动只用一个名字，持久不变。不要把 <code>black-friday</code> 写成 <code>bf-2026</code> 或 <code>black-friday-2026</code>。<strong>名称不一致 = 数据无法汇总。</strong></p>
+    </div>
+    <p><strong>命名规范</strong>：全部小写英文 · 空格用 <code>-</code> 代替 · 不含日期 · 团队自定义，保持统一</p>
+    <p><strong>常见分类参考</strong>：</p>
+    <table>
+      <tr><th>分类</th><th>示例名称</th><th>适用场景</th></tr>
+      <tr><td>🎉 节日营销</td><td><code>black-friday</code>, <code>christmas</code>, <code>backtoschool</code></td><td>黑五、圣诞、返校季</td></tr>
+      <tr><td>🏷️ 促销活动</td><td><code>spring-sale</code>, <code>flash-sale</code>, <code>free-shipping</code></td><td>春季大促、闪购、包邮</td></tr>
+      <tr><td>🚀 新品发布</td><td><code>new-product</code>, <code>limited-edition</code>, <code>restock</code></td><td>新品、限量款、补货</td></tr>
+      <tr><td>💎 会员活动</td><td><code>member-day</code>, <code>vip-sale</code>, <code>double-points</code></td><td>会员日、VIP、双倍积分</td></tr>
+      <tr><td>🏴 清仓活动</td><td><code>end-of-season</code>, <code>warehouse-sale</code>, <code>final-sale</code></td><td>季末清仓、仓库甩卖</td></tr>
+      <tr><td>🎯 品牌营销</td><td><code>brand-awareness</code>, <code>brand-anniversary</code></td><td>品牌认知、周年庆</td></tr>
+      <tr><td>🔄 老客运营</td><td><code>win-back</code>, <code>cross-sell</code>, <code>loyalty</code></td><td>召回、交叉销售、忠诚度</td></tr>
+      <tr><td>🆕 拉新获客</td><td><code>first-order</code>, <code>free-trial</code>, <code>welcome-offer</code></td><td>首单、免费试用、欢迎优惠</td></tr>
+    </table>
+
+    <h3>2. utm_medium（营销媒介）</h3>
+    <p>流量通过什么方式触达用户。</p>
+    <table>
+      <tr><th>媒介</th><th>含义</th><th>判断依据</th></tr>
+      <tr><td><code>cpc</code></td><td>付费点击广告</td><td>PPC、竞价、SEM</td></tr>
+      <tr><td><code>paid-social</code></td><td>付费社交广告</td><td>FB Ads、IG Ads、TikTok Ads</td></tr>
+      <tr><td><code>organic-social</code></td><td>自然社交内容</td><td>自然流量、发帖</td></tr>
+      <tr><td><code>email</code></td><td>邮件营销</td><td>邮件发送、EDM</td></tr>
+      <tr><td><code>influencer</code></td><td>达人营销</td><td>KOL、红人合作</td></tr>
+      <tr><td><code>affiliate</code></td><td>联盟营销</td><td>联盟伙伴、佣金推广</td></tr>
+      <tr><td><code>display</code></td><td>展示广告</td><td>banner、display</td></tr>
+      <tr><td><code>sms</code></td><td>短信</td><td>短信、SMS</td></tr>
+      <tr><td><code>qr</code></td><td>二维码</td><td>二维码扫描</td></tr>
+      <tr><td><code>referral</code></td><td>推荐/转介绍</td><td>用户推荐</td></tr>
+    </table>
+
+    <h3>3. utm_source（流量来源）</h3>
+    <p>流量从哪个具体平台或渠道来。</p>
+    <table>
+      <tr><th>来源</th><th>含义</th><th>判断依据</th></tr>
+      <tr><td><code>google</code></td><td>Google 搜索/购物</td><td>Google、谷歌</td></tr>
+      <tr><td><code>tiktok</code></td><td>TikTok</td><td>TikTok、抖音海外</td></tr>
+      <tr><td><code>facebook</code></td><td>Facebook / Meta</td><td>Facebook、Meta、FB</td></tr>
+      <tr><td><code>instagram</code></td><td>Instagram</td><td>Instagram、IG、ins</td></tr>
+      <tr><td><code>youtube</code></td><td>YouTube</td><td>YouTube</td></tr>
+      <tr><td><code>linkedin</code></td><td>LinkedIn</td><td>LinkedIn、领英</td></tr>
+      <tr><td><code>x</code></td><td>Twitter/X</td><td>X 平台</td></tr>
+      <tr><td><code>reddit</code></td><td>Reddit</td><td>Reddit</td></tr>
+      <tr><td><code>email</code></td><td>邮件</td><td>通用邮件来源</td></tr>
+      <tr><td><code>qr</code></td><td>二维码</td><td>线下二维码</td></tr>
+    </table>
+
+    <h3>4. utm_content（内容标识）</h3>
+    <p>区分同一活动下的不同素材、创作者或内容变体。</p>
+    <table>
+      <tr><th>场景</th><th>格式</th><th>示例</th></tr>
+      <tr><td>达人合作</td><td><code>creator-{名字}</code></td><td><code>creator-jessica</code></td></tr>
+      <tr><td>广告素材</td><td><code>ad-{描述}</code></td><td><code>ad-hero-banner-v1</code></td></tr>
+      <tr><td>博客文章</td><td><code>post-{slug}</code></td><td><code>post-utm-guide</code></td></tr>
+      <tr><td>邮件素材</td><td><code>email-{名称}</code></td><td><code>email-welcome-series</code></td></tr>
+    </table>
+
+    <h3>5. utm_term（时间标识）</h3>
+    <p><strong>固定格式</strong>：<code>YYYYMMDDlaunch</code></p>
+    <blockquote>全部小写，字母数字连写。固定后缀 <code>launch</code>。不传则默认用当天日期。</blockquote>
+
+    <h3>全局规范速查</h3>
+    <table>
+      <tr><th>规则</th><th>要求</th><th>错误示例</th></tr>
+      <tr><td>大小写</td><td>全部小写</td><td><code>Black-Friday</code> ❌</td></tr>
+      <tr><td>语言</td><td>英文</td><td><code>黑色星期五</code> ❌</td></tr>
+      <tr><td>分隔符</td><td>仅用 <code>-</code></td><td><code>black_friday</code> ❌</td></tr>
+      <tr><td>空格</td><td>自动转 <code>-</code></td><td><code>summer sale</code> → <code>summer-sale</code></td></tr>
+      <tr><td>日期</td><td>仅放 term</td><td><code>black-friday-2026</code> ❌</td></tr>
+      <tr><td>参数顺序</td><td>campaign→medium→source→content→term</td><td>不可调换</td></tr>
+    </table>
+
+    <!-- ============================================================ -->
+    <!-- 交互式 UTM 生成器 -->
+    <!-- ============================================================ -->
+
+    <h2 style="border:none;margin-top:60px;">🎯 在线 UTM 链接生成器</h2>
+    <p>填好参数，点击生成，一键复制完整 UTM 链接。</p>
+
+    <div class="tool-card" id="utm-tool">
+      <div class="tool-grid">
+        <div class="tool-field full">
+          <label>目标链接 <small>*</small></label>
+          <input type="url" id="tool-url" placeholder="https://shuishouac.com/products/bag" />
+        </div>
+        <div class="tool-field">
+          <label>活动名称 (campaign) <small>* 同一活动始终用同一个名称</small></label>
+          <input type="text" id="tool-campaign" list="campaign-list" placeholder="black-friday" />
+          <datalist id="campaign-list">
+            <option value="black-friday"><option value="spring-sale"><option value="summer-sale">
+            <option value="christmas"><option value="backtoschool"><option value="flash-sale">
+            <option value="new-product"><option value="member-day"><option value="vip-sale">
+            <option value="end-of-season"><option value="brand-awareness"><option value="win-back">
+            <option value="first-order"><option value="free-shipping"><option value="new-arrival">
+            <option value="limited-edition"><option value="cross-sell"><option value="lead-generation">
+          </datalist>
+        </div>
+        <div class="tool-field">
+          <label>营销媒介 (medium) <small>*</small></label>
+          <select id="tool-medium">
+            <option value="">— 选择媒介 —</option>
+            <option value="paid-social">paid-social · 付费社交</option>
+            <option value="influencer">influencer · 达人营销</option>
+            <option value="email">email · 邮件营销</option>
+            <option value="organic-social">organic-social · 自然社交</option>
+            <option value="cpc">cpc · 付费点击</option>
+            <option value="display">display · 展示广告</option>
+            <option value="affiliate">affiliate · 联盟营销</option>
+            <option value="sms">sms · 短信</option>
+            <option value="qr">qr · 二维码</option>
+            <option value="video">video · 视频广告</option>
+            <option value="banner">banner · 横幅广告</option>
+            <option value="retargeting">retargeting · 再营销</option>
+            <option value="referral">referral · 推荐</option>
+          </select>
+        </div>
+        <div class="tool-field">
+          <label>流量来源 (source) <small>*</small></label>
+          <select id="tool-source">
+            <option value="">— 选择来源 —</option>
+            <option value="instagram">instagram · Instagram</option>
+            <option value="tiktok">tiktok · TikTok</option>
+            <option value="facebook">facebook · Facebook</option>
+            <option value="google">google · Google</option>
+            <option value="youtube">youtube · YouTube</option>
+            <option value="linkedin">linkedin · LinkedIn</option>
+            <option value="x">x · Twitter/X</option>
+            <option value="reddit">reddit · Reddit</option>
+            <option value="email">email · 邮件</option>
+            <option value="qr">qr · 二维码</option>
+            <option value="sms">sms · 短信</option>
+          </select>
+        </div>
+        <div class="tool-field">
+          <label>内容标识 (content) <small>选填 · 如 creator-jessica</small></label>
+          <input type="text" id="tool-content" placeholder="creator-jessica" />
+        </div>
+        <div class="tool-field">
+          <label>发布日期 (term) <small>默认今天</small></label>
+          <input type="date" id="tool-date" />
+        </div>
+      </div>
+
+      <button class="tool-btn" onclick="generateUTM()">🔗 生成 UTM 链接</button>
+
+      <div class="tool-output" id="tool-output">
+        <div class="url" id="tool-url-result"></div>
+        <div class="tool-params" id="tool-params"></div>
+        <button class="tool-copy" id="tool-copy-btn" onclick="copyUTM()">📋 复制链接</button>
+      </div>
+
+      <div class="campaign-note" id="campaign-note">
+        💡 <strong>一致性提醒</strong>：这个活动的 campaign 名称是 <span id="campaign-name-display"></span>，
+        后续为同一活动生成链接时请保持统一，方便数据汇总分析。
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 继续文章 -->
+    <!-- ============================================================ -->
+
+    <h2>三、飞书模板：团队的 UTM 管理中枢</h2>
+    <p>除了在线工具，我们还做了一个飞书多维表格模板，适合团队协作场景。</p>
+    <div class="callout">
+      <p>📎 <strong>飞书模板</strong>：<a href="https://vz1ttoudep.feishu.cn/base/OQVablOecazotDsZGp6cZwcDnog?from=from_copylink" target="_blank">水手阿C UTM链接生成器</a></p>
+    </div>
+    <p>模板特点：</p>
+    <ul>
+      <li><strong>团队对齐</strong>：所有人用同一套下拉选项，不会出现一个渠道多个名字</li>
+      <li><strong>历史可查</strong>：每次生成的链接都有记录，复盘时直接查</li>
+      <li><strong>防错机制</strong>：下拉选项限制了错误输入</li>
+      <li><strong>自动拼接</strong>：模板自动生成完整 UTM URL</li>
+    </ul>
+    <p><strong>使用步骤</strong>：打开模板 → 点击「使用模板」→ 填入 URL 和活动信息 → 选择 source/medium → 复制生成的链接使用。</p>
+
+    <h2>四、开源工具：AI 自动生成 UTM 链接</h2>
+    <p>除了网页在线工具和飞书模板，我们还开发了 <strong>AI 对话生成</strong> 和 <strong>Python CLI</strong> 两种方式。</p>
+    <div class="callout">
+      <p>📦 <strong>GitHub 仓库</strong>：<a href="https://github.com/shuishouac/utm-link-generator" target="_blank">shuishouac/utm-link-generator</a></p>
+    </div>
+
+    <h3>方式一：AI 对话生成（推荐）</h3>
+    <p>在 AI 工具中说一句话，自动提取参数生成标准化 UTM 链接。</p>
+    <p><strong>触发关键词</strong>：<code>生成utm链接</code> / <code>生成链接</code> / <code>utm</code></p>
+
+    <h4>全信息单句触发</h4>
+    <pre><code>你：生成utm链接，我们在黑色星期五和一个叫 Jessica 的 Instagram 达人
+    合作推广新品包包，目标链接 https://shuishouac.com/products/bag，7月11日发布
+
+AI：🔗 https://shuishouac.com/products/bag?&amp;utm_campaign=black-friday
+     &amp;utm_medium=influencer&amp;utm_source=instagram
+     &amp;utm_content=creator-jessica&amp;utm_term=20260711launch</code></pre>
+
+    <h4>分段对话触发（从上下文提取）</h4>
+    <pre><code>你：下周返校季和 Carry 合作，他在 Instagram 发帖推广
+    https://shuishouac.com/，7月9号发
+AI：收到，返校季 + Instagram + Carry
+
+你：生成utm链接
+AI：（从上文提取全部参数，直接生成，不会重复问）</code></pre>
+
+    <h4>信息不全时只问缺失项</h4>
+    <pre><code>你：帮我生成utm链接，黑色星期五活动，目标链接 https://myshop.com/sale
+
+AI：已知道：✅ 目标链接 ✅ 活动
+    还需要补充：① 什么方式触达？② 哪个平台？</code></pre>
+
+    <h4>批量生成 & 修改复用</h4>
+    <pre><code>批量：帮我生成这周两个 UTM 链接，周三发春季大促邮件→链接A，周五发达人推新品→链接B
+修改：刚才那个链接，目标链接改成 https://myshop.com/spring2026，其他不变</code></pre>
+
+    <h3>方式二：Python CLI 工具（适合批量操作）</h3>
+    <pre><code># 安装
+git clone https://github.com/shuishouac/utm-link-generator.git
+cd utm-link-generator
+pip install -r requirements.txt
+
+# 交互模式
+python scripts/utm_generator.py --interactive
+
+# 命令行模式
+python scripts/utm_generator.py \
+  --url https://shuishouac.com/sale \
+  --campaign spring-sale \
+  --medium paid-social \
+  --source facebook \
+  --content ad-spring-creative \
+  --term 20260712launch</code></pre>
+
+    <h2>五、最佳实践与常见误区</h2>
+    <h3>✅ 推荐做法</h3>
+    <ol>
+      <li><strong>活动开始前定义好 campaign 名称</strong>，记录在飞书模板中</li>
+      <li><strong>同一活动的所有渠道使用同一个 campaign 名称</strong>，通过 source 和 medium 区分渠道</li>
+      <li><strong>每次生成后记录到飞书模板</strong>，方便复盘</li>
+      <li><strong>用 utm_content 做 A/B 测试</strong>，区分不同素材效果</li>
+      <li><strong>定期检查 campaign 名称一致性</strong>，发现不一致及时修正</li>
+    </ol>
+
+    <h3>❌ 常见错误</h3>
+    <table>
+      <tr><th>错误</th><th>后果</th><th>正确做法</th></tr>
+      <tr><td>同一活动用不同 campaign 名称</td><td>数据分散无法汇总</td><td>一个活动始终用同一个名称</td></tr>
+      <tr><td>campaign 名称带日期</td><td>下次无法复用</td><td>日期放 utm_term</td></tr>
+      <tr><td>用中文或大写</td><td>链接编码异常</td><td>全小写英文</td></tr>
+      <tr><td>用下划线 <code>_</code></td><td>部分工具识别异常</td><td>只用 <code>-</code></td></tr>
+      <tr><td>混用 medium 和 source</td><td>数据口径混乱</td><td>medium 是方式，source 是平台</td></tr>
+    </table>
+
+    <h3>实际案例</h3>
+    <p><strong>场景</strong>：春季大促，同时做了邮件和 Instagram 达人推广</p>
+    <pre><code>✅ 正确做法：
+  邮件  → utm_campaign=spring-sale&amp;utm_medium=email&amp;utm_source=email
+  达人  → utm_campaign=spring-sale&amp;utm_medium=influencer&amp;utm_source=instagram
+  → 按 campaign=spring-sale 聚合，看两个渠道效果
+
+❌ 错误做法：
+  邮件  → utm_campaign=spring-sale-email&amp;utm_medium=email
+  达人  → utm_campaign=spring-sale-influencer&amp;utm_medium=influencer
+  → 两个渠道 campaign 不同，无法按活动聚合</code></pre>
+
+    <h2>六、总结</h2>
+    <p>UTM 链接看似一个小工具，但它是营销数据分析的<strong>基础设施</strong>。</p>
+    <table>
+      <tr><th>要素</th><th>工具</th><th>作用</th></tr>
+      <tr><td>📋 规范定义</td><td>飞书多维表格模板</td><td>团队对齐标准，记录历史</td></tr>
+      <tr><td>🌐 在线工具</td><td>本页 UTM 生成器</td><td>浏览器直接使用，无需安装</td></tr>
+      <tr><td>🤖 AI 自动生成</td><td>AI 对话 / Proma Skill</td><td>一句话生成，无需手动拼接</td></tr>
+      <tr><td>🔧 批量管理</td><td>Python CLI 工具</td><td>适合批量操作和自动化流程</td></tr>
+    </table>
+
+    <h3>相关链接</h3>
+    <ul>
+      <li>📎 <strong>飞书模板</strong>：<a href="https://vz1ttoudep.feishu.cn/base/OQVablOecazotDsZGp6cZwcDnog?from=from_copylink" target="_blank">水手阿C UTM链接生成器</a></li>
+      <li>📦 <strong>GitHub 仓库</strong>：<a href="https://github.com/shuishouac/utm-link-generator" target="_blank">shuishouac/utm-link-generator</a></li>
+      <li>📖 <strong>使用手册</strong>：<a href="https://github.com/shuishouac/utm-link-generator/blob/main/USAGE.md" target="_blank">USAGE.md</a></li>
+    </ul>
+
+    <div class="bottom-nav">
+      <a href="/">← 返回首页</a>
+      <a href="#">↑ 回到顶部</a>
+    </div>
+  </article>
+</div>
+
+<script>
+// 默认日期为今天
+document.getElementById('tool-date').valueAsDate = new Date();
+
+function generateUTM() {
+  const url = document.getElementById('tool-url').value.trim();
+  let campaign = document.getElementById('tool-campaign').value.trim();
+  const medium = document.getElementById('tool-medium').value;
+  const source = document.getElementById('tool-source').value;
+  const content = document.getElementById('tool-content').value.trim();
+  const dateInput = document.getElementById('tool-date').value;
+
+  // Validate
+  if (!url) { alert('请输入目标链接'); return; }
+  if (!campaign) { alert('请输入活动名称 (campaign)'); return; }
+  if (!medium) { alert('请选择营销媒介 (medium)'); return; }
+  if (!source) { alert('请选择流量来源 (source)'); return; }
+
+  // Normalize
+  campaign = campaign.toLowerCase().replace(/\s+/g, '-');
+  const term = dateInput
+    ? dateInput.replace(/-/g, '') + 'launch'
+    : new Date().toISOString().slice(0,10).replace(/-/g, '') + 'launch';
+  const contentClean = content ? content.toLowerCase().replace(/\s+/g, '-') : '';
+
+  // Build URL
+  let params = `utm_campaign=${encodeURIComponent(campaign)}`;
+  params += `&utm_medium=${encodeURIComponent(medium)}`;
+  params += `&utm_source=${encodeURIComponent(source)}`;
+  if (contentClean) params += `&utm_content=${encodeURIComponent(contentClean)}`;
+  params += `&utm_term=${encodeURIComponent(term)}`;
+
+  const separator = url.includes('?') ? '&' : '?&';
+  const fullUrl = url + separator + params;
+
+  // Display output
+  const output = document.getElementById('tool-output');
+  output.classList.add('show');
+
+  document.getElementById('tool-url-result').innerHTML =
+    `<strong>🔗 UTM 链接</strong><br><a href="${fullUrl}" target="_blank">${fullUrl}</a>`;
+
+  const paramsHtml = `
+    <span class="key">utm_campaign</span>
+    <span class="val">${campaign}</span>
+    <span class="hint">⚠️ 后续请保持统一</span>
+    <span class="key">utm_medium</span>
+    <span class="val">${medium}</span>
+    <span class="key">utm_source</span>
+    <span class="val">${source}</span>
+    ${contentClean ? `<span class="key">utm_content</span><span class="val">${contentClean}</span>` : ''}
+    <span class="key">utm_term</span>
+    <span class="val">${term}</span>
+  `;
+  document.getElementById('tool-params').innerHTML = paramsHtml;
+
+  // Campaign consistency note
+  const note = document.getElementById('campaign-note');
+  document.getElementById('campaign-name-display').textContent = campaign;
+  note.classList.add('show');
+
+  // Reset copy button
+  const copyBtn = document.getElementById('tool-copy-btn');
+  copyBtn.textContent = '📋 复制链接';
+  copyBtn.classList.remove('copied');
+  copyBtn.dataset.url = fullUrl;
+
+  // Scroll to output
+  output.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function copyUTM() {
+  const btn = document.getElementById('tool-copy-btn');
+  const url = btn.dataset.url;
+  if (!url) return;
+  navigator.clipboard.writeText(url).then(() => {
+    btn.textContent = '✅ 已复制';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '📋 复制链接';
+      btn.classList.remove('copied');
+    }, 2000);
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = url;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.textContent = '✅ 已复制';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '📋 复制链接';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+</script>
+
+</body>
+</html>
