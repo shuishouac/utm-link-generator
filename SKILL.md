@@ -43,6 +43,13 @@ utm_term 是**必填参数**，永远不允许省略。
 - `launch` 不是强制绑定的——用户可以换成自定义后缀，也可以显式去掉
 - content 已标识的维度，term 不重复；反之亦然
 
+### 规则 5：主动询问发布日期
+- **必问项**：每次生成 UTM 链接时，必须主动询问用户发布日期
+- 例外：只有当用户**在上下文里明确说了日期**（如"7月11号发"），才可以直接使用
+- 禁止行为：用户没说日期就默默用当天日期
+- 追问话术：**"发布日期是哪天？"** 或 **"这个内容什么时候发？"**
+- 用户回答后 → 格式化为 `YYYYMMDD` + 后缀（默认 `launch`）
+
 ---
 
 ## 总原则
@@ -313,9 +320,12 @@ https://example.com/?utm_campaign={campaign}&utm_medium={medium}&utm_source={sou
 > **Agent**：好的，请告诉我：
 > 1️⃣ 目标链接是什么？
 > 2️⃣ 这是什么活动？
-> 3️⃣ 通过什么方式触达？...
+> 3️⃣ 通过什么方式触达？
+> 4️⃣ 在哪个平台？
+> 5️⃣ 发布日期是哪天？
+> ...
 >
-> **你**：https://myshop.com/sale，黑色星期五，Jessica 在 Instagram 发帖
+> **你**：https://myshop.com/sale，黑色星期五，Jessica 在 Instagram 发帖，7月11号
 > **Agent**：（生成完整链接）
 
 ### 方式四：批量生成多个链接
@@ -341,6 +351,8 @@ https://example.com/?utm_campaign={campaign}&utm_medium={medium}&utm_source={sou
 
 如果当前对话中已经包含了必要的信息（URL、活动类型、渠道、日期等），直接提取，**不需要重新向用户确认**。
 
+但日期必须用户明确提供——上下文没提到日期时，不能默认用当天。
+
 **第二步：参数提取**
 
 对每一项参数，按优先级从以下来源提取：
@@ -352,7 +364,8 @@ https://example.com/?utm_campaign={campaign}&utm_medium={medium}&utm_source={sou
 | `medium` | ①上下文触达方式 ②反问用户 |
 | `source` | ①上下文平台/渠道 ②反问用户 |
 | `content` | ①上下文达人/素材名 ②视情况留空 |
-| `term` | ①用户指定日期 ②默认当天 |
+| `term` （日期） | **①用户显式提供 ②反问用户（不使用默认当天）** |
+| `term` （后缀） | ①用户指定 ②默认 `launch` ③反问场景区分 |
 
 **第三步：仅信息缺失时反问**
 
@@ -360,12 +373,17 @@ https://example.com/?utm_campaign={campaign}&utm_medium={medium}&utm_source={sou
 
 > ✅ 正确做法：
 > 用户: 帮我生成黑色星期五的utm链接 https://myshop.com/sale
-> Agent: 收到！黑五活动。是通过什么方式触达？哪个平台？
+> Agent: 收到！黑五活动。是通过什么方式触达？哪个平台？发布日期是哪天？
 
 > ❌ 错误做法：
 > 用户: 帮我生成黑色星期五的utm链接 https://myshop.com/sale
 > Agent: 目标链接是什么？什么活动？什么方式？...
-> （用户刚说过，不应重复问）
+> （用户刚说过URL和活动，不应重复问）
+
+> ❌ 错误做法（日期）：
+> 用户: 生成utm链接，黑色星期五，Jessica在Instagram发帖
+> Agent:（默默用今天日期生成，不问用户）
+> （日期必须问用户，不能默认）
 
 **第四步：生成后确认 campaign 名称一致性**
 
