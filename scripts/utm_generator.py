@@ -13,7 +13,7 @@ UTM Link Generator — 标准化 UTM 链接生成工具
   --content CONTENT      内容标识（utm_content，可选）
   --term TERM            完整自定义 utm_term（覆盖日期+后缀自动生成）
   --term-date TERM_DATE  日期部分（8位数字，如 20260713）
-  --term-suffix SUFFIX   后缀（默认 launch，如 fb-ad, vip）
+  --term-suffix SUFFIX   场景后缀（如 ig-story, fb-ad, bio），不带则仅日期
   --interactive          交互模式，逐步引导输入
 
 参数顺序固定：campaign → medium → source → content → term
@@ -82,15 +82,19 @@ VALID_MEDIUMS = [
 
 def generate_utm(url: str, campaign: str, medium: str, source: str,
                  content: str = "", term: str = "",
-                 term_date: str = "", term_suffix: str = "launch") -> str:
+                 term_date: str = "", term_suffix: str = "") -> str:
     """生成标准化 UTM 链接。
 
     参数顺序固定：campaign → medium → source → content → term
 
     term 生成逻辑（优先级从上到下）：
       ① 传入 term → 直接用（完全自定义）
-      ② 传入 term_date → YYYYMMDD + term_suffix（默认 launch）
-      ③ 都不传 → 今天日期 + launch
+      ② 传入 term_date + term_suffix → YYYYMMDD + 后缀（如 20260713ig-story）
+      ③ 传入 term_date（无后缀）→ 仅日期（如 20260713）
+      ④ 都不传 → 仅今天的日期（如 20260713）
+
+    content 在 medium=influencer 时自动加 creator- 前缀。
+    场景区分放 term 后缀，content 只标识达人/素材本身，两者不重复。
     """
     # 参数清洗
     campaign = campaign.lower().strip().replace(" ", "-")
@@ -102,11 +106,11 @@ def generate_utm(url: str, campaign: str, medium: str, source: str,
     if medium == "influencer" and content and not content.startswith("creator-"):
         content = "creator-" + content
 
-    # term 生成：完全自定义 > 日期+后缀 > 今天+launch
+    # term 生成：完全自定义 > 日期+后缀 > 仅日期
     if not term:
         if not term_date:
             term_date = datetime.now().strftime("%Y%m%d")
-        term = term_date + term_suffix
+        term = term_date + term_suffix if term_suffix else term_date
     term = term.lower().strip()
 
     # 警告未知参数（自定义 campaign 只提醒不报错）
@@ -182,15 +186,13 @@ def interactive_mode():
     date_input = input(f"   发布日期（8 位数字，回车默认 {default_date}）: ").strip()
     term_date = date_input if date_input and date_input.isdigit() and len(date_input) == 8 else default_date
 
-    print("\n7️⃣  utm_term — 自定义后缀")
-    print(f"   格式: {term_date}【你的后缀】")
-    suffix_input = input(f"   后缀（回车默认 launch）: ").strip().lower()
-    term_suffix = suffix_input if suffix_input else "launch"
-    if not term_suffix.startswith("-") and not term_suffix.startswith("_"):
-        # 不含特殊前缀，保持原样（如 launch, fb-ad, vip）
-        pass
+    print("\n7️⃣  utm_term — 场景后缀（选填）")
+    print(f"   区分同一活动不同发布形式，比如 ig-story / ig-post / bio / fb-ad")
+    print(f"   格式: {term_date}【后缀】")
+    suffix_input = input(f"   后缀（不带则仅有日期）: ").strip().lower()
+    term_suffix = suffix_input if suffix_input else ""
 
-    term = term_date + term_suffix
+    term = term_date + term_suffix if term_suffix else term_date
 
     result = generate_utm(url, campaign, medium, source, content, term)
 
@@ -218,7 +220,7 @@ def main():
     parser.add_argument("--content", help="内容标识 (utm_content，可选)", default="")
     parser.add_argument("--term", help="完整自定义 utm_term（覆盖 date+suffix 自动生成）", default="")
     parser.add_argument("--term-date", help="日期部分（8位数字，如 20260713）", default="")
-    parser.add_argument("--term-suffix", help="后缀（默认 launch，如 fb-ad, vip）", default="launch")
+    parser.add_argument("--term-suffix", help="场景后缀（如 ig-story, fb-ad, bio），不带则仅日期", default="")
     parser.add_argument("--interactive", "-i", action="store_true", help="交互模式")
     parser.add_argument("--list-campaigns", action="store_true", help="列出所有 campaign 选项")
     parser.add_argument("--list-sources", action="store_true", help="列出所有 source 选项")
