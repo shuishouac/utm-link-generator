@@ -89,18 +89,22 @@ def generate_utm(url: str, campaign: str, medium: str, source: str,
     source = source.lower().strip().replace(" ", "-")
     content = content.lower().strip().replace(" ", "-") if content else ""
 
+    # 当 medium 是 influencer 且 content 有值但没加 creator- 前缀时，自动补充
+    if medium == "influencer" and content and not content.startswith("creator-"):
+        content = "creator-" + content
+
     if not term:
         term = datetime.now().strftime("%Y%m%d") + "launch"
     term = term.lower().strip()
 
-    # 警告未知参数
+    # 警告未知参数（自定义 campaign 只提醒不报错）
     warnings = []
     if source not in VALID_SOURCES:
         warnings.append(f"⚠️  '{source}' 不在标准 source 列表中: {', '.join(VALID_SOURCES)}")
     if medium not in VALID_MEDIUMS:
         warnings.append(f"⚠️  '{medium}' 不在标准 medium 列表中: {', '.join(VALID_MEDIUMS)}")
     if campaign not in VALID_CAMPAIGNS:
-        warnings.append(f"⚠️  '{campaign}' 不在标准 campaign 列表中")
+        warnings.append(f"💡  campaign '{campaign}' 是自定义名称，确认后续同一活动统一使用此名称")
 
     for w in warnings:
         print(w, file=sys.stderr)
@@ -117,9 +121,6 @@ def generate_utm(url: str, campaign: str, medium: str, source: str,
 
     param_str = "&".join(f"{k}={v}" for k, v in params)
     separator = "?" if "?" not in url else "&"
-    # 如果 URL 已有 ?，就用 & 开头；否则用 ?& 开头
-    if "?" not in url:
-        separator = "?&"
 
     return url + separator + param_str
 
@@ -160,6 +161,9 @@ def interactive_mode():
         print(f"⚠️  '{source}' 不在标准列表中，仍将使用")
 
     content = input("\n5️⃣  内容标识 (utm_content，选填): ").strip().lower().replace(" ", "-")
+    if content and medium == "influencer" and not content.startswith("creator-"):
+        print(f"   ℹ️  自动补充前缀: creator-{content}")
+        content = "creator-" + content
 
     default_term = datetime.now().strftime("%Y%m%d") + "launch"
     term_input = input(f"\n6️⃣  发布日期 (回车默认 {default_term}): ").strip().lower()

@@ -8,6 +8,38 @@
 
 ---
 
+## 🔴 强制执行规则（Agent 必须遵守）
+
+以下规则在每次生成 UTM 链接时**必须严格执行**，不允许例外：
+
+```
+https://example.com/?utm_campaign={campaign}&utm_medium={medium}&utm_source={source}&utm_content={content}&utm_term={term}
+```
+
+### 规则 1：参数顺序固定
+URL 中参数必须按 **campaign → medium → source → content → term** 的顺序排列。
+> ✅ `?utm_campaign=black-friday&utm_medium=influencer&utm_source=instagram&utm_content=creator-jessica&utm_term=20260713launch`
+> ❌ `?utm_source=instagram&utm_medium=influencer&utm_campaign=bf2026&utm_content=jessica`
+
+### 规则 2：campaign 必须用标准名称或用户确认
+- 优先使用参考列表中已有的固定名称（如 `black-friday`, `spring-sale`）
+- 如果用户自定义名称，必须确认一致性：**"campaign 名称使用 `xxx`，后续同活动请保持统一，可以吗？"**
+- 禁止使用缩写、变体或临时名称（如 `bf2026`、`bf-sale` 应统一为 `black-friday`）
+
+### 规则 3：content 必含前缀
+- 达人合作（medium=influencer）：**必须**使用 `creator-{达人名}` 格式
+  - ✅ `creator-jessica`、`creator-carry`
+  - ❌ `jessica`、`jessica_story`、`jessica-post`
+- 广告素材：使用 `ad-{描述}`
+- 邮件：使用 `email-{名称}`
+
+### 规则 4：term 始终生成
+utm_term 是**必填参数**，永远不允许省略。
+- 用户有指定日期 → `YYYYMMDDlaunch`
+- 用户没指定日期 → `当前日期+launch`（如 `20260713launch`）
+
+---
+
 ## 总原则
 
 生成 UTM 链接前，先理解用户提供的上下文（渠道、内容、活动类型等），然后按以下规范拼装完整的 UTM URL。
@@ -15,7 +47,7 @@
 ### 核心格式
 
 ```
-https://example.com/?&utm_campaign={campaign}&utm_medium={medium}&utm_source={source}&utm_content={content}&utm_term={term}
+https://example.com/?utm_campaign={campaign}&utm_medium={medium}&utm_source={source}&utm_content={content}&utm_term={term}
 ```
 
 > 参数顺序固定：**utm_campaign → utm_medium → utm_source → utm_content → utm_term**，与模板表格列顺序一致。
@@ -340,7 +372,7 @@ Agent: 记下了，黑五 + Instagram + Jessica。
 Agent:
 🔗 UTM 链接
 
-https://shuishouac.com/bag?&utm_campaign=black-friday&utm_medium=influencer&utm_source=instagram&utm_content=creator-jessica&utm_term=20260711launch
+https://shuishouac.com/bag?utm_campaign=black-friday&utm_medium=influencer&utm_source=instagram&utm_content=creator-jessica&utm_term=20260711launch
 
 📋 参数解析
 | 参数 | 值 | 说明 |
@@ -402,7 +434,7 @@ Agent: 收到！已知道：
 ```
 🔗 UTM 链接
 
-https://myshop.com/products/bag?&utm_campaign=black-friday&utm_medium=influencer&utm_source=instagram&utm_content=creator-jessica&utm_term=20260711launch
+https://myshop.com/products/bag?utm_campaign=black-friday&utm_medium=influencer&utm_source=instagram&utm_content=creator-jessica&utm_term=20260711launch
 
 ---
 
@@ -423,7 +455,7 @@ https://myshop.com/products/bag?&utm_campaign=black-friday&utm_medium=influencer
 
 **生成结果**：
 ```
-https://myshop.com/member?&utm_campaign=double-points&utm_medium=email&utm_source=email&utm_content=email-double-points&utm_term=20260709launch
+https://myshop.com/member?utm_campaign=double-points&utm_medium=email&utm_source=email&utm_content=email-double-points&utm_term=20260709launch
 ```
 
 ### 示例 3：社媒广告（全信息单句触发）
@@ -433,7 +465,7 @@ https://myshop.com/member?&utm_campaign=double-points&utm_medium=email&utm_sourc
 
 **生成结果**：
 ```
-https://myshop.com/collections/dresses?&utm_campaign=spring-sale&utm_medium=paid-social&utm_source=tiktok&utm_content=ad-spring-dresses&utm_term=20260711launch
+https://myshop.com/collections/dresses?utm_campaign=spring-sale&utm_medium=paid-social&utm_source=tiktok&utm_content=ad-spring-dresses&utm_term=20260711launch
 ```
 
 ### 示例 4：分段对话触发（从上下文提取）
@@ -447,7 +479,7 @@ Agent: 好的，返校季活动 + Instagram + Carry。
 Agent:
 🔗 UTM 链接
 
-https://shuishouac.com/?&utm_campaign=backtoschool&utm_medium=influencer&utm_source=instagram&utm_content=creator-carry&utm_term=20260709launch
+https://shuishouac.com/?utm_campaign=backtoschool&utm_medium=influencer&utm_source=instagram&utm_content=creator-carry&utm_term=20260709launch
 
 📋 参数解析
 | utm_campaign | backtoschool | ⚠️ 后续同一活动请保持统一 |
@@ -468,7 +500,7 @@ https://shuishouac.com/?&utm_campaign=backtoschool&utm_medium=influencer&utm_sou
 
 **生成结果**：
 ```
-https://shuishouac.com/summer?&utm_campaign=summer-sale-2026&utm_medium=paid-social&utm_source=facebook&utm_content=ad-summer-sale&utm_term=20260712launch
+https://shuishouac.com/summer?utm_campaign=summer-sale-2026&utm_medium=paid-social&utm_source=facebook&utm_content=ad-summer-sale&utm_term=20260712launch
 ```
 
 ### 示例 6：信息不完整（仅反问缺失项）
@@ -492,7 +524,7 @@ https://shuishouac.com/summer?&utm_campaign=summer-sale-2026&utm_medium=paid-soc
 ```
 🔗 UTM 链接
 
-https://shuishouac.com/sale?&utm_campaign=black-friday&utm_medium=influencer&utm_source=instagram&utm_content=20260711launch
+https://shuishouac.com/sale?utm_campaign=black-friday&utm_medium=influencer&utm_source=instagram&utm_content=creator-jessica&utm_term=20260713launch
 ```
 
 ### 示例 7：批量生成多个链接
@@ -506,10 +538,10 @@ https://shuishouac.com/sale?&utm_campaign=black-friday&utm_medium=influencer&utm
 **生成结果**：
 ```
 1️⃣ 邮件（7月11日）
-https://shuishouac.com/sale?&utm_campaign=spring-sale&utm_medium=email&utm_source=email&utm_content=email-spring-sale&utm_term=20260711launch
+https://shuishouac.com/sale?utm_campaign=spring-sale&utm_medium=email&utm_source=email&utm_content=email-spring-sale&utm_term=20260711launch
 
 2️⃣ 达人合作（7月11日）
-https://shuishouac.com/new?&utm_campaign=spring-sale&utm_medium=influencer&utm_source=instagram&utm_content=creator-&utm_term=20260711launch
+https://shuishouac.com/new?utm_campaign=spring-sale&utm_medium=influencer&utm_source=instagram&utm_content=creator-unknown&utm_term=20260711launch
 
 ⚠️ 两个链接都使用 campaign 名称 spring-sale，方便统一分析。
 ```
@@ -521,7 +553,7 @@ https://shuishouac.com/new?&utm_campaign=spring-sale&utm_medium=influencer&utm_s
 
 **生成结果**（复用上次参数，只变 URL）：
 ```
-https://shuishouac.com/spring2026?&utm_campaign=spring-sale&utm_medium=email&utm_source=email&utm_content=email-spring-sale&utm_term=20260711launch
+https://shuishouac.com/spring2026?utm_campaign=spring-sale&utm_medium=email&utm_source=email&utm_content=email-spring-sale&utm_term=20260711launch
 ```
 
 ---
